@@ -13,7 +13,7 @@ class BaseModel(models.Model):
 
 
 class Movies(BaseModel):
-    title = models.CharField(max_length=255)
+    title = models.CharField(max_length=255, db_index=True)
     release_date = models.DateField()
     url = models.URLField()
     created_at = models.DateTimeField(auto_now_add=True)
@@ -21,7 +21,7 @@ class Movies(BaseModel):
 
 
 class Planets(BaseModel):
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, db_index=True)
     url = models.URLField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -34,6 +34,11 @@ class FavoriteMovies(BaseModel):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['user_id', 'movie'], name='favorite_movie_pk'),
+        ]
+
 
 class FavoritePlanets(BaseModel):
     user_id = models.BigIntegerField()
@@ -41,3 +46,8 @@ class FavoritePlanets(BaseModel):
     custom_name = models.CharField(max_length=255, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['user_id', 'planet'], name='favorite_planet_pk'),
+        ]
