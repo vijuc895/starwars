@@ -98,7 +98,7 @@ def add_favorite_planet(request):
     user_id = request.data.get('user_id')
     custom_name = request.data.get('custom_name')
 
-    logger.info(msg='adding {} planet as fav planey for user: {}'.format(planet_name, user_id))
+    logger.info(msg='adding {} planet as fav planet for user: {}'.format(planet_name, user_id))
 
     if not planet_name or not user_id:
         logger.error(msg='Missing required data: {} and {}'.format(planet_name, user_id))
@@ -142,7 +142,8 @@ def get_planet_list(request, *args, **kwargs):
     """
     user_id = request.GET.get('user_id')
     query = request.GET.get('search_by')
-    key = f'planets:{user_id}:{query}'
+    page_number = request.GET.get('page', 1)
+    key = f'planets:{user_id}:{query}:{page_number}'
     cached_data = cache.get(key)
     if cached_data:
         return JsonResponse(cached_data)
@@ -161,7 +162,6 @@ def get_planet_list(request, *args, **kwargs):
     ).order_by('-created_at')
     if query:
         planets = planets.filter(models.Q(name__icontains=query) | models.Q(custom_name__icontains=query))
-    page_number = request.GET.get('page', 1)
     paginator = Paginator(planets, 10)
     page_obj = paginator.get_page(page_number)
     response = {
@@ -172,6 +172,8 @@ def get_planet_list(request, *args, **kwargs):
         next_url = reverse('planet-list') + '?page=' + str(page_obj.next_page_number())
         if query:
             next_url += '&search_by=' + query
+        if user_id:
+            next_url += '&user_id=' + user_id
         response['next_page'] = next_url
     for planet in page_obj:
         response['results'].append({
@@ -201,7 +203,8 @@ def get_movie_list(request, *args, **kwargs):
     """
     user_id = request.GET.get('user_id')
     query = request.GET.get('search_by')
-    key = f'movies:{user_id}:{query}'
+    page_number = request.GET.get('page', 1)
+    key = f'movies:{user_id}:{query}:{page_number}'
     cached_data = cache.get(key)
     if cached_data:
         return JsonResponse(cached_data)
@@ -220,7 +223,6 @@ def get_movie_list(request, *args, **kwargs):
     ).order_by('-created_at')
     if query:
         movies = movies.filter(models.Q(title__icontains=query) | models.Q(custom_title__icontains=query))
-    page_number = request.GET.get('page', 1)
     paginator = Paginator(movies, 10)
     page_obj = paginator.get_page(page_number)
     response = {
@@ -231,6 +233,8 @@ def get_movie_list(request, *args, **kwargs):
         next_url = reverse('movie-list') + '?page=' + str(page_obj.next_page_number())
         if query:
             next_url += '&search_by=' + query
+        if user_id:
+            next_url += '&user_id=' + user_id
         response['next_page'] = next_url
     for movie in page_obj:
         response['results'].append({
