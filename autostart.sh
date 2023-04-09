@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # Run database migrations
+python manage.py makemigrations
 python manage.py migrate
 
 # Collect movie and planet data
